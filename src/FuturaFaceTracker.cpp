@@ -6,6 +6,8 @@
 void FuturaFaceTracker::init() {
     Serial.begin(115200);
     delay(3000);
+    ledcSetup(LEDC_CHANNEL_2, 5000, 13);
+    ledcAttachPin(4, LEDC_CHANNEL_2);
    
     this->portal = new AutoConnect(this->portalServer);
     this->apConfig = new AutoConnectConfig(AP_NAME, AP_PASSWORD);
@@ -23,6 +25,7 @@ void FuturaFaceTracker::init() {
         this->initStreamServer();
         this->initServer();
         this->initOTA();
+        this->loadEprom();
     }
 }
 
@@ -67,4 +70,5 @@ void FuturaFaceTracker::initMDNS() {
 void FuturaFaceTracker::loop() {
     this->portal->handleClient();
     ArduinoOTA.handle();
+    ledcWrite(LEDC_CHANNEL_2, this->flash);
 }
