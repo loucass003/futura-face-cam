@@ -6,6 +6,7 @@
 #include "esp_http_server.h"
 #include "ArduinoOTA.h"
 #include <Preferences.h>
+#include <FastLED.h>
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -37,7 +38,8 @@ class FuturaFaceTracker {
         httpd_handle_t streamServer;
         AsyncWebServer *webServer;
         Preferences preferences;
+        CRGB leds[1];
 
-        uint8_t battery;
+        uint16_t battery;
         uint8_t flash;
 };

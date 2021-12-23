@@ -28,15 +28,15 @@ void FuturaFaceTracker::configureCamera() {
         .pin_pclk = CAM_PIN_PCLK,
 
         //XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
-        .xclk_freq_hz = 20000000,
+        .xclk_freq_hz = 10000000,
         .ledc_timer = LEDC_TIMER_0,
         .ledc_channel = LEDC_CHANNEL_0,
 
         .pixel_format = PIXFORMAT_JPEG, //YUV422,GRAYSCALE,RGB565,JPEG
         .frame_size = FRAMESIZE_240X240,    //QQVGA-UXGA Do not use sizes above QVGA when not JPEG
 
-        .jpeg_quality = 13, //0-63 lower number means higher quality
-        .fb_count = 1,       //if more than one, i2s runs in continuous mode. Use only with JPEG
+        .jpeg_quality = 5, //0-63 lower number means higher quality
+        .fb_count = 3,       //if more than one, i2s runs in continuous mode. Use only with JPEG
     };
     this->cameraConfig = configureCamera;
 }
@@ -49,8 +49,9 @@ bool FuturaFaceTracker::initCamera() {
         return false;
     }
     sensor_t * s = esp_camera_sensor_get();
-    s->set_framesize(s, FRAMESIZE_QVGA);
-
+    // s->set_denoise(s, 1);
+    // s->set_framesize(s, FRAMESIZE_240X240);
+    // s->set_brightness(s, 1);
     return true;
 }
 
@@ -147,6 +148,8 @@ esp_err_t FuturaFaceTracker::streamHandler(httpd_req_t *req) {
         {
             break;
         }
+
+        // delay(100);
     }
     return res;
 }

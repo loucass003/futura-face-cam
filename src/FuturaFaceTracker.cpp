@@ -6,9 +6,9 @@
 void FuturaFaceTracker::init() {
     Serial.begin(115200);
     delay(3000);
-    ledcSetup(LEDC_CHANNEL_2, 5000, 13);
-    ledcAttachPin(4, LEDC_CHANNEL_2);
-   
+    FastLED.addLeds<WS2811, 13, GRB>(this->leds, 1).setCorrection( TypicalLEDStrip );
+
+
     this->portal = new AutoConnect(this->portalServer);
     this->apConfig = new AutoConnectConfig(AP_NAME, AP_PASSWORD);
     this->apConfig->preserveAPMode = false;
@@ -70,5 +70,7 @@ void FuturaFaceTracker::initMDNS() {
 void FuturaFaceTracker::loop() {
     this->portal->handleClient();
     ArduinoOTA.handle();
-    ledcWrite(LEDC_CHANNEL_2, this->flash);
+    this->leds[0] = CRGB::White;
+    FastLED.setBrightness(this->flash);
+    FastLED.show();
 }

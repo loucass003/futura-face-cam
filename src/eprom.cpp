@@ -4,6 +4,6 @@
 void FuturaFaceTracker::loadEprom() {
     this->preferences.begin("fftracker", false);
 
-    this->flash = this->preferences.getUChar("flash", 0);
+    this->flash = this->preferences.getUChar("flash", 255);
 
 }
