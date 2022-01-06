@@ -3,30 +3,50 @@
 #include "configuration.h"
 #include "FuturaFaceTracker.h"
 
+
+bool wifi_error_blink(FuturaFaceTracker *t) {
+    static bool toggle = false;
+
+    if (WiFi.status() != WL_CONNECTED) {
+        t->leds[0] = toggle ? CRGB::Red : CRGB::Blue;
+        toggle = !toggle;
+        FastLED.show();
+    }
+    return true;
+}
+
+void FuturaFaceTracker::onConnect(IPAddress& clientIP) {
+    Serial.println("WiFi connected: " + WiFi.localIP().toString());
+    this->configureCamera();
+
+    while (!this->initCamera()) {
+        delay(1000);
+    }
+    this->initMDNS();
+    this->initStreamServer();
+    this->initServer();
+    this->initOTA();
+    this->loadEprom();
+}
+
 void FuturaFaceTracker::init() {
     Serial.begin(115200);
-    delay(3000);
+
+    delay(3000); // DO NOT REMOVE ! NEVER !
+
     FastLED.addLeds<WS2811, 13, GRB>(this->leds, 1).setCorrection( TypicalLEDStrip );
-
-
+    FastLED.setBrightness(255);
+    
+    
+    this->wifiTimer.every(1000, wifi_error_blink, this);
     this->portal = new AutoConnect(this->portalServer);
     this->apConfig = new AutoConnectConfig(AP_NAME, AP_PASSWORD);
-    this->apConfig->preserveAPMode = false;
+    this->apConfig->preserveAPMode = true;
     this->apConfig->ota = AC_OTA_EXTRA;
     this->portal->config(*this->apConfig);
-    if (this->portal->begin()) {
-        Serial.println("WiFi connected: " + WiFi.localIP().toString());
-        this->configureCamera();
-
-        while (!this->initCamera()) {
-            delay(1000);
-        }
-        this->initMDNS();
-        this->initStreamServer();
-        this->initServer();
-        this->initOTA();
-        this->loadEprom();
-    }
+    this->portal->onConnect([this] (IPAddress& clientIP) { this->onConnect(clientIP); });
+    this->portal->whileCaptivePortal([this] () { this->wifiTimer.tick(); return true; });
+    this->portal->begin();
 }
 
 
@@ -53,6 +73,8 @@ void FuturaFaceTracker::initOTA() {
         else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
     ArduinoOTA.begin();
+
+    Serial.println("OTA initialized");
 }
 
 void FuturaFaceTracker::initMDNS() {
@@ -63,14 +85,18 @@ void FuturaFaceTracker::initMDNS() {
         MDNS.addServiceTxt("futura", "tcp", "version", VERSION);
         MDNS.addServiceTxt("futura", "tcp", "id", String(this->getDeviceId(), HEX));
         MDNS.addServiceTxt("futura", "tcp", "type", "FuturaFaceTracker");
+        Serial.println("MDNS initialized");
     }
-    
 }
 
 void FuturaFaceTracker::loop() {
     this->portal->handleClient();
     ArduinoOTA.handle();
-    this->leds[0] = CRGB::White;
-    FastLED.setBrightness(this->flash);
+   
+    if (WiFi.status() == WL_CONNECTED) {
+        this->leds[0] = CRGB::White;
+        FastLED.setBrightness(this->flash);
+    }
+    this->wifiTimer.tick();
     FastLED.show();
 }

@@ -20,4 +20,6 @@
 # define SERVER_PORT 82
 #endif
 
-#define BOARD BOARD_ESP32CAM_AITHINKER
+#ifndef BOARD
+# define BOARD BOARD_ESP32CAM_AITHINKER
+#endif

@@ -35,7 +35,7 @@ void FuturaFaceTracker::configureCamera() {
         .pixel_format = PIXFORMAT_JPEG, //YUV422,GRAYSCALE,RGB565,JPEG
         .frame_size = FRAMESIZE_240X240,    //QQVGA-UXGA Do not use sizes above QVGA when not JPEG
 
-        .jpeg_quality = 5, //0-63 lower number means higher quality
+        .jpeg_quality = 7, //0-63 lower number means higher quality
         .fb_count = 3,       //if more than one, i2s runs in continuous mode. Use only with JPEG
     };
     this->cameraConfig = configureCamera;

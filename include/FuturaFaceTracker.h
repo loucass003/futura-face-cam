@@ -6,6 +6,7 @@
 #include "esp_http_server.h"
 #include "ArduinoOTA.h"
 #include <Preferences.h>
+#include <arduino-timer.h>
 #include <FastLED.h>
 
 #define STR_HELPER(x) #x
@@ -23,6 +24,7 @@ class FuturaFaceTracker {
         void initStreamServer();
         bool initCamera();
         void webRoutes();
+        void onConnect(IPAddress& clientIP);
         void statusHandler(AsyncWebServerRequest *request);
         void setFlashHandler(AsyncWebServerRequest *request);
         void loadEprom();
@@ -30,6 +32,9 @@ class FuturaFaceTracker {
         static esp_err_t streamHandler(httpd_req_t *req);
         String getDeviceName();
         uint16_t getDeviceId();
+
+        CRGB leds[1];
+
     private:
         WebServer portalServer;
         AutoConnect *portal;
@@ -38,7 +43,8 @@ class FuturaFaceTracker {
         httpd_handle_t streamServer;
         AsyncWebServer *webServer;
         Preferences preferences;
-        CRGB leds[1];
+     
+        Timer<1, millis, FuturaFaceTracker*> wifiTimer;
 
         uint16_t battery;
         uint8_t flash;
