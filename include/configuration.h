@@ -1,4 +1,4 @@
-#define VERSION "0.0.1"
+//#define VERSION "0.0.1"
 
 #ifndef AP_NAME
 # define AP_NAME "Futura Face Tracker"
