@@ -7,7 +7,8 @@ static const char *_STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" 
 static const char *_STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char *_STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\nX-Timestamp: %d.%06d\r\n\r\n";
 
-void FuturaFaceTracker::configureCamera() {
+void FuturaFaceTracker::configureCamera()
+{
     camera_config_t configureCamera = {
         .pin_pwdn = CAM_PIN_PWDN,
         .pin_reset = CAM_PIN_RESET,
@@ -27,36 +28,37 @@ void FuturaFaceTracker::configureCamera() {
         .pin_href = CAM_PIN_HREF,
         .pin_pclk = CAM_PIN_PCLK,
 
-        //XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
+        // XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
         .xclk_freq_hz = 10000000,
         .ledc_timer = LEDC_TIMER_0,
         .ledc_channel = LEDC_CHANNEL_0,
 
-        .pixel_format = PIXFORMAT_JPEG, //YUV422,GRAYSCALE,RGB565,JPEG
-        .frame_size = FRAMESIZE_240X240,    //QQVGA-UXGA Do not use sizes above QVGA when not JPEG
+        .pixel_format = PIXFORMAT_JPEG,  // YUV422,GRAYSCALE,RGB565,JPEG
+        .frame_size = FRAMESIZE_240X240, // QQVGA-UXGA Do not use sizes above QVGA when not JPEG
 
-        .jpeg_quality = 7, //0-63 lower number means higher quality
-        .fb_count = 3,       //if more than one, i2s runs in continuous mode. Use only with JPEG
+        .jpeg_quality = 7, // 0-63 lower number means higher quality
+        .fb_count = 3,     // if more than one, i2s runs in continuous mode. Use only with JPEG
     };
     this->cameraConfig = configureCamera;
 }
 
-bool FuturaFaceTracker::initCamera() {
+bool FuturaFaceTracker::initCamera()
+{
     esp_err_t err = esp_camera_init(&this->cameraConfig);
     if (err != ESP_OK)
     {
-        Serial.println("Camera Init Failed");
+        log_e("Camera Init Failed");
         return false;
     }
-    sensor_t * s = esp_camera_sensor_get();
+    sensor_t *s = esp_camera_sensor_get();
     // s->set_denoise(s, 1);
     // s->set_framesize(s, FRAMESIZE_240X240);
     // s->set_brightness(s, 1);
     return true;
 }
 
-
-void FuturaFaceTracker::initStreamServer() {
+void FuturaFaceTracker::initStreamServer()
+{
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = STREAM_PORT;
     config.max_uri_handlers = 1;
@@ -65,17 +67,17 @@ void FuturaFaceTracker::initStreamServer() {
         .uri = "/stream",
         .method = HTTP_GET,
         .handler = FuturaFaceTracker::streamHandler,
-        .user_ctx = this
-    };
+        .user_ctx = this};
 
-    Serial.println("Sarting stream server");
+    log_i("Starting stream server");
     if (httpd_start(&this->streamServer, &config) == ESP_OK)
     {
         httpd_register_uri_handler(this->streamServer, &status);
     }
 }
 
-esp_err_t FuturaFaceTracker::streamHandler(httpd_req_t *req) {
+esp_err_t FuturaFaceTracker::streamHandler(httpd_req_t *req)
+{
     FuturaFaceTracker *ft = (FuturaFaceTracker *)req->user_ctx;
     camera_fb_t *fb = NULL;
     struct timeval _timestamp;
@@ -148,8 +150,6 @@ esp_err_t FuturaFaceTracker::streamHandler(httpd_req_t *req) {
         {
             break;
         }
-
-        // delay(100);
     }
     return res;
 }

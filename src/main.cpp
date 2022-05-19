@@ -2,11 +2,13 @@
 
 FuturaFaceTracker *tracker;
 
-void setup() {
+void setup()
+{
     tracker = new FuturaFaceTracker();
     tracker->init();
 }
 
-void loop() {
+void loop()
+{
     tracker->loop();
 }
