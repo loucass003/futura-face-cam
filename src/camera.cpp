@@ -98,7 +98,7 @@ esp_err_t FuturaFaceTracker::streamHandler(httpd_req_t *req)
         fb = esp_camera_fb_get();
         if (!fb)
         {
-            ESP_LOGE(TAG, "Camera capture failed");
+            log_e("Camera capture failed");
             res = ESP_FAIL;
         }
         else
@@ -112,7 +112,7 @@ esp_err_t FuturaFaceTracker::streamHandler(httpd_req_t *req)
                 fb = NULL;
                 if (!jpeg_converted)
                 {
-                    ESP_LOGE(TAG, "JPEG compression failed");
+                    log_e("JPEG compression failed");
                     res = ESP_FAIL;
                 }
             }
